@@ -1,140 +1,203 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Body Shape Estimator</title>
+  <title>What Is My Body Shape?</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary-color: #2c2c2c;
+      --secondary-color: #f8f4f2;
+      --accent-color: #787878;
+      --text-dark: #2c2c2c;
+      --text-light: #555;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--secondary-color);
+      color: var(--text-dark);
+      line-height: 1.6;
       padding: 2rem;
-      max-width: 600px;
+      max-width: 800px;
       margin: auto;
     }
+
+    h1, h2, h3 {
+      font-family: 'Playfair Display', serif;
+      color: var(--primary-color);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      font-size: 1.1rem;
+    }
+
     label {
       display: block;
       margin-top: 1rem;
+      font-weight: 600;
     }
+
     input[type="number"], select {
       width: 100%;
       padding: 0.5rem;
       margin-top: 0.3rem;
-    }
-    button {
-      margin-top: 1.5rem;
-      padding: 0.7rem 1.5rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
       font-size: 1rem;
-      cursor: pointer;
     }
-    .result {
+
+    button {
       margin-top: 2rem;
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
     }
-    .tooltip {
-      position: relative;
-      display: inline-block;
-      cursor: help;
+
+    button:hover {
+      background-color: var(--accent-color);
     }
-    .tooltip .tooltiptext {
-      visibility: hidden;
-      width: 250px;
-      background-color: #333;
-      color: #fff;
-      text-align: left;
-      border-radius: 6px;
+
+    .result, .suggested-items {
+      margin-top: 2.5rem;
+    }
+	
+	.suggested-items{
+		background-color: white;
+		padding: 1rem;
+		border-radius: 10px;
+	}
+
+    .info-icon {
+      cursor: pointer;
+      margin-left: 0.3rem;
+      font-size: 1rem;
+    }
+
+    .info-text {
+      display: none;
+      font-size: 0.9rem;
+      color: var(--text-light);
+      margin-top: 0.3rem;
+      background-color: #fff;
       padding: 0.5rem;
-      position: absolute;
-      z-index: 1;
-      bottom: 125%;
-      left: 0;
-      opacity: 0;
-      transition: opacity 0.3s;
+      border-left: 3px solid #ccc;
+      border-radius: 10px;
+    }
+
+    .info-text.active {
+      display: block;
+    }
+
+    .progress-container {
+      background-color: #d1d1d1;
+      border-radius: 20px;
+      overflow: hidden;
+      height: 24px;
+      margin-top: 1rem;
       font-size: 0.9rem;
     }
-    .tooltip:hover .tooltiptext {
-      visibility: visible;
-      opacity: 1;
-    }
-    .progress-container {
-      background-color: #eee;
-      border-radius: 10px;
-      overflow: hidden;
-      height: 20px;
-      margin-top: 0.5rem;
-      margin-bottom: 1rem;
-    }
+
     .progress-bar {
       height: 100%;
-      text-align: right;
-      padding-right: 5px;
+      padding-left: 10px;
+      line-height: 24px;
       color: white;
-      white-space: nowrap;
-      line-height: 20px;
+      font-weight: bold;
       transition: width 1s ease-in-out;
+    }
+
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+    }
+
+    .image-grid-item {
+      text-align: center;
+      background-color: var(--secondary-color);
+      border-radius: 8px;
+      padding: 1rem;
+      transition: transform 0.3s;
       cursor: pointer;
     }
-    .collapse {
-      display: none;
-      padding-top: 10px;
+
+    .image-grid-item:hover {
+      transform: translateY(-5px);
     }
-    .suggested-items {
-      margin-top: 2rem;
-      padding: 1rem;
-      background-color: #f4f4f4;
-      border-radius: 10px;
-    }
-    .suggested-items ul {
-      list-style-type: disc;
-      padding-left: 20px;
+
+    .image-grid-item img {
+      width: 100%;
+      height: auto;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
-  <h1>Body Shape Estimator</h1>
-  <form id="bodyShapeForm" onsubmit="return false;">
-    <label>
-      <div class="tooltip">Bust (<span id="bustUnit">in</span>):
-        <span class="tooltiptext">Measure around the fullest part of your bust, usually over the nipples.</span>
-      </div>
-    </label>
-    <input type="number" id="bust" required />
+<h1>What Is My Body Shape?</h1>
+<p>Discover your unique body shape with our free Body Shape Estimator tool. By entering your bust, waist, and hip measurements, you can accurately identify whether you have an hourglass, pear, apple, rectangle, or inverted triangle body type. This interactive calculator not only helps you understand your natural proportions but also provides personalized fashion suggestions tailored to your silhouette. Perfect for anyone looking to enhance their style, improve fit, or build a body-positive wardrobe.</p>
+<form id="bodyShapeForm" onsubmit="return false;">
+<label>
+      Bust (<span id="bustUnit">in</span>)
+      <span class="info-icon" onclick="toggleInfo('bust')">ℹ️</span>
+</label>
+<input id="bust" required="" type="number"/>
+<div class="info-text" id="info-bust">Measure around the fullest part of your bust, usually over the nipples.</div>
+<label>
+      Waist (<span id="waistUnit">in</span>)
+      <span class="info-icon" onclick="toggleInfo('waist')">ℹ️</span>
+</label>
+<input id="waist" required="" type="number"/>
+<div class="info-text" id="info-waist">Measure around the narrowest part of your waist, usually just above your belly button.</div>
+<label>
+      Hips (<span id="hipsUnit">in</span>)
+      <span class="info-icon" onclick="toggleInfo('hips')">ℹ️</span>
+</label>
+<input id="hips" required="" type="number"/>
+<div class="info-text" id="info-hips">Measure around the fullest part of your hips and buttocks.</div>
+<label>
+      Units
+      <span class="info-icon" onclick="toggleInfo('unit')">ℹ️</span>
+</label>
+<select id="unitToggle">
+<option value="in">Inches</option>
+<option value="cm">Centimeters</option>
+</select>
+<div class="info-text" id="info-unit">Select the measurement units you are using for all inputs.</div>
+<button id="calculateBtn" type="button">Calculate</button>
+</form>
+<div class="result" id="result"></div>
+<div class="suggested-items" id="suggestedItems"></div>
+<script>
+    function toggleInfo(field) {
+      const el = document.getElementById(`info-${field}`);
+      const isActive = el.classList.contains('active');
+      document.querySelectorAll('.info-text').forEach(info => info.classList.remove('active'));
+      if (!isActive) el.classList.add('active');
+    }
 
-    <label>
-      <div class="tooltip">Waist (<span id="waistUnit">in</span>):
-        <span class="tooltiptext">Measure around the narrowest part of your waist, usually just above your belly button.</span>
-      </div>
-    </label>
-    <input type="number" id="waist" required />
-
-    <label>
-      <div class="tooltip">Hips (<span id="hipsUnit">in</span>):
-        <span class="tooltiptext">Measure around the fullest part of your hips and buttocks.</span>
-      </div>
-    </label>
-    <input type="number" id="hips" required />
-
-    <label>
-      <div class="tooltip">Units:
-        <span class="tooltiptext">Select the measurement units you are using for all inputs.</span>
-      </div>
-      <select id="unitToggle">
-        <option value="in">Inches</option>
-        <option value="cm">Centimeters</option>
-      </select>
-    </label>
-
-    <button type="button" id="calculateBtn">Calculate</button>
-  </form>
-
-  <div class="result" id="result"></div>
-
-  <div class="suggested-items" id="suggestedItems"></div>
-
-  <script>
     function calculateRatios(bust, waist, hips) {
-      const BHR = bust / hips;
-      const WBR = waist / bust;
-      const WHR = waist / hips;
-      return { BHR, WBR, WHR };
+      return {
+        BHR: bust / hips,
+        WBR: waist / bust,
+        WHR: waist / hips
+      };
     }
 
     function similarityScore(val, target, tolerance) {
@@ -143,209 +206,387 @@
 
     function estimateBodyShape(bust, waist, hips) {
       const { BHR, WBR, WHR } = calculateRatios(bust, waist, hips);
-
-      const shapes = {
-        Hourglass: (
-          similarityScore(BHR, 1.0, 0.1) +
-          similarityScore(WBR, 0.7, 0.1) +
-          similarityScore(WHR, 0.7, 0.1)
-        ) / 3,
-
-        Pear: (
-          similarityScore(BHR, 0.85, 0.1) +
-          similarityScore(WBR, 0.7, 0.1) +
-          similarityScore(WHR, 0.7, 0.1)
-        ) / 3,
-
-        Apple: (
-          similarityScore(BHR, 1.1, 0.1) +
-          similarityScore(WBR, 0.85, 0.1) +
-          similarityScore(WHR, 0.85, 0.1)
-        ) / 3,
-
-        Rectangle: (
-          similarityScore(BHR, 1.0, 0.1) +
-          similarityScore(WBR, 0.85, 0.1) +
-          similarityScore(WHR, 0.85, 0.1)
-        ) / 3,
-
+      return {
+        Hourglass: (similarityScore(BHR, 1.0, 0.1) + similarityScore(WBR, 0.7, 0.1) + similarityScore(WHR, 0.7, 0.1)) / 3,
+        Pear: (similarityScore(BHR, 0.85, 0.1) + similarityScore(WBR, 0.7, 0.1) + similarityScore(WHR, 0.7, 0.1)) / 3,
+        Apple: (similarityScore(BHR, 1.1, 0.1) + similarityScore(WBR, 0.85, 0.1) + similarityScore(WHR, 0.85, 0.1)) / 3,
+        Rectangle: (similarityScore(BHR, 1.0, 0.1) + similarityScore(WBR, 0.85, 0.1) + similarityScore(WHR, 0.85, 0.1)) / 3,
         "Inverted Triangle": similarityScore(BHR, 1.15, 0.1)
       };
-
-      return shapes;
     }
-
-    const bodyShapeDetails = {
-      Hourglass: {
-        traits: "Curved figure with a well-defined waist, bust and hips balanced.",
-        goal: "Emphasize your curves and maintain balance in the proportions.",
-        suggestedItems: [
-          "Belted dresses",
-          "High-waisted pants",
-          "V-neck tops",
-          "Peplum tops",
-          "A-line skirts",
-          "Tailored blazers",
-          "Fitted dresses",
-          "Pencil skirts",
-          "Wrap dresses",
-          "Embellished tops"
-        ]
-      },
-      Pear: {
-        traits: "Narrow shoulders and bust with fuller hips and thighs.",
-        goal: "Balance out proportions by adding volume on top and minimizing the bottom.",
-        suggestedItems: [
-          "Embellished tops",
-          "Empire-waist dresses",
-          "Boat-neck tops",
-          "Dark-colored pants",
-          "Tailored blazers",
-          "Peplum tops",
-          "High-waisted skirts",
-          "Off-shoulder tops",
-          "Ruffled blouses",
-          "Fitted jackets"
-        ]
-      },
-      Apple: {
-        traits: "Broader shoulders, bust, and waist, with slimmer legs.",
-        goal: "Draw attention away from the midsection and highlight legs.",
-        suggestedItems: [
-          "Empire-waist dresses",
-          "V-neck tops",
-          "A-line skirts",
-          "Tunic tops",
-          "Wide-legged pants",
-          "Long cardigans",
-          "Flowy blouses",
-          "Bootcut jeans",
-          "Asymmetrical tops",
-          "Draped jackets"
-        ]
-      },
-      Rectangle: {
-        traits: "Similar bust, waist, and hip measurements.",
-        goal: "Create curves by adding volume at the bust and hips.",
-        suggestedItems: [
-          "Peplum tops",
-          "Flared skirts",
-          "Tailored blazers",
-          "Layered looks",
-          "Wide-leg pants",
-          "Ruffle details",
-          "Belted dresses",
-          "Tunic tops",
-          "A-line dresses",
-          "Statement necklaces"
-        ]
-      },
-      "Inverted Triangle": {
-        traits: "Wider shoulders, narrower hips.",
-        goal: "Soften the upper body and add volume to the lower body.",
-        suggestedItems: [
-          "V-neck tops",
-          "Empire-waist dresses",
-          "Flutter-sleeve blouses",
-          "Tailored pants",
-          "Tunic dresses",
-          "Flared jeans",
-          "A-line skirts",
-          "Peplum jackets",
-          "Wide-leg trousers",
-          "Belted tops"
-        ]
-      }
-    };
-
-    function updateUnits(newUnit) {
-      const bustInput = document.getElementById("bust");
-      const waistInput = document.getElementById("waist");
-      const hipsInput = document.getElementById("hips");
-
-      const previousUnit = document.getElementById("bustUnit").textContent;
-
-      if (previousUnit !== newUnit) {
-        const factor = newUnit === "cm" ? 2.54 : 0.393701;
-        bustInput.value = (bustInput.value * factor).toFixed(2);
-        waistInput.value = (waistInput.value * factor).toFixed(2);
-        hipsInput.value = (hipsInput.value * factor).toFixed(2);
-      }
-
-      document.getElementById("bustUnit").textContent = newUnit;
-      document.getElementById("waistUnit").textContent = newUnit;
-      document.getElementById("hipsUnit").textContent = newUnit;
-    }
-
-    document.getElementById("unitToggle").addEventListener("change", function () {
-      updateUnits(this.value);
-    });
 
     function getColorFromPercentage(percentage) {
-      const red = Math.min(255, (100 - percentage) * 2.55);
-      const green = Math.min(255, percentage * 2.55);
+      const red = Math.min(255, (100 - percentage) * 2.55 * 2);
+      const green = Math.min(255, percentage * 2.55 * 2);
       return `rgb(${red}, ${green}, 0)`;
     }
 
-    function toggleDescription(shape) {
-      const description = document.getElementById(`desc-${shape}`);
-      description.style.display = description.style.display === "block" ? "none" : "block";
-    }
+const bodyShapeDetails = {
+  Hourglass: {
+    traits: "The <b>hourglass body shape</b> is all about balance - your bust and hips are proportionate with a well-defined waist. This classic figure is made for fitted styles that hug your curves and highlight your silhouette. If you have an hourglass shape, embrace clothing that supports and accentuates your waistline, like wrap dresses, high-waisted jeans, or tailored blazers. Your curvy shape deserves to be celebrated in styles that make you feel confident and empowered.",
+    goal: "Celebrate your curves by choosing clothing that highlights your natural waist while maintaining the balance between top and bottom.",
+	image: "https://placehold.co/200x300",
+    suggestedItems: [
+      { name: "Belted dress", imageUrl: "https://placehold.co/518x558", productURL: "https://www.amazon.co.uk/s?k=womens+Belted+dress" },
+      { name: "Peplum top", imageUrl: "https://placehold.co/474x532", productURL: "https://www.amazon.co.uk/s?k=womens+Peplum+top" },
+      { name: "High-waisted jeans", imageUrl: "https://placehold.co/597x514", productURL: "https://www.amazon.co.uk/s?k=womens+High-waisted+jeans" },
+      { name: "A-line skirt", imageUrl: "https://placehold.co/508x416", productURL: "https://www.amazon.co.uk/s?k=womens+A-line+skirt" },
+      { name: "Tailored blazer", imageUrl: "https://placehold.co/460x442", productURL: "https://www.amazon.co.uk/s?k=womens+Tailored+blazer" },
+      { name: "V-neck top", imageUrl: "https://placehold.co/409x570", productURL: "https://www.amazon.co.uk/s?k=womens+V-neck+top" },
+      { name: "Pencil skirt", imageUrl: "https://placehold.co/429x546", productURL: "https://www.amazon.co.uk/s?k=womens+Pencil+skirt" },
+      { name: "Bodysuit", imageUrl: "https://placehold.co/594x541", productURL: "https://www.amazon.co.uk/s?k=womens+Bodysuit" },
+      { name: "Fit-and-flare dress", imageUrl: "https://placehold.co/591x539", productURL: "https://www.amazon.co.uk/s?k=womens+Fit-and-flare+dress" },
+      { name: "Empire-waist dress", imageUrl: "https://placehold.co/432x548", productURL: "https://www.amazon.co.uk/s?k=womens+Empire-waist+dress" },
+      { name: "Crop top", imageUrl: "https://placehold.co/442x509", productURL: "https://www.amazon.co.uk/s?k=womens+Crop+top" },
+      { name: "Button-down shirt", imageUrl: "https://placehold.co/567x462", productURL: "https://www.amazon.co.uk/s?k=womens+Button-down+shirt" }
+    ]
+  },
+  Pear: {
+      traits: "The <b>pear body shape</b>, also known as the <b>triangle body shape</b>, features hips that are wider than the shoulders. If you have a pear-shaped figure, your curves are beautifully balanced with a defined waist and shapely lower body. Embrace your natural proportions with styles that highlight your waist and add symmetry with structured tops or statement accessories. From wrap dresses to A-line skirts, there are countless flattering fashion options that celebrate your pear-shaped beauty.",
+    goal: "Add visual interest to the upper body to balance the silhouette and gently slim the lower body with clean lines and dark colors.",
+	image: "https://placehold.co/200x300",
+    suggestedItems: [
+      { name: "Off-shoulder top", imageUrl: "https://placehold.co/580x424", productURL: "https://www.amazon.co.uk/s?k=womens+Off-shoulder+top" },
+      { name: "Peplum top", imageUrl: "https://placehold.co/479x470", productURL: "https://www.amazon.co.uk/s?k=womens+Peplum+top" },
+      { name: "Belted cardigan", imageUrl: "https://placehold.co/469x514", productURL: "https://www.amazon.co.uk/s?k=womens+Belted+cardigan" },
+      { name: "Wide-leg pants", imageUrl: "https://placehold.co/423x482", productURL: "https://www.amazon.co.uk/s?k=womens+Wide-leg+pants" },
+      { name: "High-waisted skirt", imageUrl: "https://placehold.co/504x522", productURL: "https://www.amazon.co.uk/s?k=womens+High-waisted+skirt" },
+      { name: "Empire-waist dress", imageUrl: "https://placehold.co/546x462", productURL: "https://www.amazon.co.uk/s?k=womens+Empire-waist+dress" },
+      { name: "V-neck top", imageUrl: "https://placehold.co/567x472", productURL: "https://www.amazon.co.uk/s?k=womens+V-neck+top" },
+      { name: "A-line dress", imageUrl: "https://placehold.co/475x552", productURL: "https://www.amazon.co.uk/s?k=womens+A-line+dress" },
+      { name: "Flowy blouse", imageUrl: "https://placehold.co/464x410", productURL: "https://www.amazon.co.uk/s?k=womens+Flowy+blouse" },
+      { name: "Tailored jacket", imageUrl: "https://placehold.co/481x431", productURL: "https://www.amazon.co.uk/s?k=womens+Tailored+jacket" },
+      { name: "Straight-leg jeans", imageUrl: "https://placehold.co/426x455", productURL: "https://www.amazon.co.uk/s?k=womens+Straight-leg+jeans" },
+      { name: "Printed top", imageUrl: "https://placehold.co/576x556", productURL: "https://www.amazon.co.uk/s?k=womens+Printed+top" }
+    ]
+  },
+  Apple: {
+      traits: "The <b>apple body shape</b>, or <b>round body shape</b>, typically carries more volume through the midsection, often with a full bust and slender legs. If you have an apple-shaped figure, styles that elongate and define the torso, like empire waistlines, flowy tops, and structured jackets can be super flattering and comfortable. Your shape shines in looks that draw the eye upward and let your personality take center stage. Celebrate your curves and wear what makes you feel unstoppable!",
+    goal: "Direct attention to your neckline and legs, while using streamlined garments to create a smooth, flattering torso.",
+	image: "https://placehold.co/200x300",
+    suggestedItems: [
+      { name: "Empire-waist dress", imageUrl: "https://placehold.co/531x493", productURL: "https://www.amazon.co.uk/s?k=womens+Empire-waist+dress" },
+      { name: "V-neck blouse", imageUrl: "https://placehold.co/509x460", productURL: "https://www.amazon.co.uk/s?k=womens+V-neck+blouse" },
+      { name: "Tunic top", imageUrl: "https://placehold.co/468x486", productURL: "https://www.amazon.co.uk/s?k=womens+Tunic+top" },
+      { name: "Straight-leg pants", imageUrl: "https://placehold.co/582x514", productURL: "https://www.amazon.co.uk/s?k=womens+Straight-leg+pants" },
+      { name: "A-line skirt", imageUrl: "https://placehold.co/554x485", productURL: "https://www.amazon.co.uk/s?k=womens+A-line+skirt" },
+      { name: "Tailored jacket", imageUrl: "https://placehold.co/536x441", productURL: "https://www.amazon.co.uk/s?k=womens+Tailored+jacket" },
+      { name: "Belted cardigan", imageUrl: "https://placehold.co/432x507", productURL: "https://www.amazon.co.uk/s?k=womens+Belted+cardigan" },
+      { name: "Bootcut jeans", imageUrl: "https://placehold.co/545x424", productURL: "https://www.amazon.co.uk/s?k=womens+Bootcut+jeans" },
+      { name: "High-waisted trousers", imageUrl: "https://placehold.co/453x454", productURL: "https://www.amazon.co.uk/s?k=womens+High-waisted+trousers" },
+      { name: "Fit-and-flare dress", imageUrl: "https://placehold.co/520x544", productURL: "https://www.amazon.co.uk/s?k=womens+Fit-and-flare+dress" },
+      { name: "Straight-line dress", imageUrl: "https://placehold.co/493x444", productURL: "https://www.amazon.co.uk/s?k=womens+Straight-line+dress" },
+      { name: "Statement necklace", imageUrl: "https://placehold.co/514x439", productURL: "https://www.amazon.co.uk/s?k=womens+Statement+necklace" }
+    ]
+  },
+  Rectangle: {
+    traits: "The <b>rectangle body shape</b> (also called an <b>athletic</b> or <b>straight body shape</b>) typically has evenly balanced shoulders, waist, and hips. If you have a rectangle-shaped body, your naturally streamlined silhouette looks amazing in styles that create definition and movement. Try belted pieces, peplum tops, or layered outfits to highlight your shape. With your versatile frame, you can effortlessly rock minimalist looks or bold prints - whatever makes you feel fabulous!",
+    goal: "Create the illusion of curves with added volume around the hips and bust and draw attention to your waist with definition.",
+	image: "https://placehold.co/200x300",
+    suggestedItems: [
+      { name: "Peplum top", imageUrl: "https://placehold.co/482x521", productURL: "https://www.amazon.co.uk/s?k=womens+Peplum+top" },
+      { name: "Belted dress", imageUrl: "https://placehold.co/542x569", productURL: "https://www.amazon.co.uk/s?k=womens+Belted+dress" },
+      { name: "A-line skirt", imageUrl: "https://placehold.co/547x496", productURL: "https://www.amazon.co.uk/s?k=womens+A-line+skirt" },
+      { name: "Pencil skirt", imageUrl: "https://placehold.co/490x577", productURL: "https://www.amazon.co.uk/s?k=womens+Pencil+skirt" },
+      { name: "Fitted blazer", imageUrl: "https://placehold.co/477x531", productURL: "https://www.amazon.co.uk/s?k=womens+Fitted+blazer" },
+      { name: "V-neck top", imageUrl: "https://placehold.co/502x561", productURL: "https://www.amazon.co.uk/s?k=womens+V-neck+top" },
+      { name: "Bodysuit", imageUrl: "https://placehold.co/419x523", productURL: "https://www.amazon.co.uk/s?k=womens+Bodysuit" },
+      { name: "High-waisted trousers", imageUrl: "https://placehold.co/514x557", productURL: "https://www.amazon.co.uk/s?k=womens+High-waisted+trousers" },
+      { name: "Fit-and-flare dress", imageUrl: "https://placehold.co/503x533", productURL: "https://www.amazon.co.uk/s?k=womens+Fit-and-flare+dress" },
+      { name: "Tailored pants", imageUrl: "https://placehold.co/439x548", productURL: "https://www.amazon.co.uk/s?k=womens+Tailored+pants" },
+      { name: "Ruffled blouse", imageUrl: "https://placehold.co/495x477", productURL: "https://www.amazon.co.uk/s?k=womens+Ruffled+blouse" }
+    ]
+  },
+  InvertedTriangle: {
+      traits: "The <b>inverted triangle body shape</b> features broad shoulders or a larger bust, with narrower hips. If this is your body shape, your powerful upper frame is perfect for off-the-shoulder tops, deep V-necks, and clothes that add volume or curves to your lower half. Balance and style go hand-in-hand, and fashion-forward pieces like wide-leg pants or flared skirts can beautifully showcase your proportions. Celebrate your athletic, statuesque shape with confidence!",
+    goal: "Balance out your silhouette by adding volume to the lower half of your body, while keeping the top streamlined.",
+	image: "https://placehold.co/200x300",
+    suggestedItems: [
+      { name: "Peplum top", imageUrl: "https://placehold.co/514x523", productURL: "https://www.amazon.co.uk/s?k=womens+Peplum+top" },
+      { name: "V-neck dress", imageUrl: "https://placehold.co/522x479", productURL: "https://www.amazon.co.uk/s?k=womens+V-neck+dress" },
+      { name: "A-line skirt", imageUrl: "https://placehold.co/569x511", productURL: "https://www.amazon.co.uk/s?k=womens+A-line+skirt" },
+      { name: "Tailored jacket", imageUrl: "https://placehold.co/508x540", productURL: "https://www.amazon.co.uk/s?k=womens+Tailored+jacket" },
+      { name: "Wide-leg pants", imageUrl: "https://placehold.co/452x485", productURL: "https://www.amazon.co.uk/s?k=womens+Wide-leg+pants" },
+      { name: "Bootcut jeans", imageUrl: "https://placehold.co/523x455", productURL: "https://www.amazon.co.uk/s?k=womens+Bootcut+jeans" },
+      { name: "Fit-and-flare dress", imageUrl: "https://placehold.co/572x544", productURL: "https://www.amazon.co.uk/s?k=womens+Fit-and-flare+dress" },
+      { name: "Belted cardigan", imageUrl: "https://placehold.co/508x511", productURL: "https://www.amazon.co.uk/s?k=womens+Belted+cardigan" },
+      { name: "Maxi skirt", imageUrl: "https://placehold.co/483x562", productURL: "https://www.amazon.co.uk/s?k=womens+Maxi+skirt" },
+      { name: "Asymmetrical dress", imageUrl: "https://placehold.co/504x518", productURL: "https://www.amazon.co.uk/s?k=womens+Asymmetrical+dress" },
+      { name: "A-line trousers", imageUrl: "https://placehold.co/506x477", productURL: "https://www.amazon.co.uk/s?k=womens+A-line+trousers" }
+    ]
+  }
+};
 
-    document.getElementById("bodyShapeForm").addEventListener("keydown", function (event) {
-      if (event.key === "Enter") {
-        event.preventDefault(); // Prevent form submission
-        document.getElementById("calculateBtn").click();
-      }
+
+    document.getElementById("unitToggle").addEventListener("change", (event) => {
+      updateUnits(event.target.value);
     });
 
-    document.getElementById("calculateBtn").addEventListener("click", function () {
+    document.getElementById("calculateBtn").addEventListener("click", () => {
       const bust = parseFloat(document.getElementById("bust").value);
       const waist = parseFloat(document.getElementById("waist").value);
       const hips = parseFloat(document.getElementById("hips").value);
       const unit = document.getElementById("unitToggle").value;
 
-      if (isNaN(bust) || isNaN(waist) || isNaN(hips)) return;
+      if (isNaN(bust) || isNaN(waist) || isNaN(hips)) {
+        alert("Please enter valid numbers.");
+        return;
+      }
 
-      const conversionFactor = unit === "cm" ? 0.393701 : 1;
-      const bustInInches = bust * conversionFactor;
-      const waistInInches = waist * conversionFactor;
-      const hipsInInches = hips * conversionFactor;
-
-      const results = estimateBodyShape(bustInInches, waistInInches, hipsInInches);
-      const sortedResults = Object.entries(results).sort((a, b) => b[1] - a[1]);
-
-      const resultDiv = document.getElementById("result");
-      let resultHTML = `<h2>Estimated Body Shape Similarity</h2><ul>`;
-
-      sortedResults.forEach(([shape, score]) => {
-        resultHTML += `
-          <li>
-            <div class="progress-container">
-              <div class="progress-bar" onclick="toggleDescription('${shape}')" style="width: ${score}%; background-color: ${getColorFromPercentage(score)};">
-                ${shape} - ${score.toFixed(1)}%
-              </div>
-            </div>
-            <div id="desc-${shape}" class="collapse">
-              <h3>Details about ${shape} Body Shape:</h3>
-              <p><strong>Traits:</strong> ${bodyShapeDetails[shape].traits}</p>
-              <p><strong>Goal in Styling:</strong> ${bodyShapeDetails[shape].goal}</p>
-              <p><strong>Suggested Items:</strong></p>
-              <ul>
-                ${bodyShapeDetails[shape].suggestedItems.map(item => `<li>${item}</li>`).join('')}
-              </ul>
-            </div>
-          </li>`;
+      const bodyShapeScores = estimateBodyShape(bust, waist, hips);
+      const bestShape = Object.keys(bodyShapeScores).reduce((best, current) => {
+        return bodyShapeScores[current] > bodyShapeScores[best] ? current : best;
       });
 
-      resultHTML += `</ul>`;
-      resultDiv.innerHTML = resultHTML;
+      const shapeDetails = bodyShapeDetails[bestShape];
+      const shapeColor = getColorFromPercentage(bodyShapeScores[bestShape]);
 
-      const suggestedItemsDiv = document.getElementById("suggestedItems");
-      suggestedItemsDiv.innerHTML = `<h2>Suggested Clothing for Your Body Shape</h2><ul>
-        ${bodyShapeDetails[sortedResults[0][0]].suggestedItems.map(item => `<li>${item}</li>`).join('')}
-      </ul>`;
+      const resultHtml = `
+        <div>
+          <h3>Your Body Shape: ${bestShape}</h3>
+          <p><strong>Traits:</strong> ${shapeDetails.traits}</p>
+		  <img src = "${shapeDetails.image}">
+          <p><strong>Goal:</strong> ${shapeDetails.goal}</p>
+        </div>
+      `;
+
+      const suggestedItemsHtml = `
+        <h3>Suggested Items:</h3>
+        <div class="image-grid">
+          ${shapeDetails.suggestedItems.map(item => `
+            <div class="image-grid-item" style="cursor: pointer;" onclick="window.open('${item.productURL}', '_blank');">
+              <img src="${item.imageUrl}" alt="${item.name}">
+              <p>${item.name}</p>
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+const sortedScores = Object.entries(bodyShapeScores)
+  .sort((a, b) => b[1] - a[1]); // Sort by score descending
+
+const progressBarsHtml = `
+  <h3>Body Shape Score:</h3>
+  ${sortedScores.map(([shape, score]) => `
+    <div class="progress-container">
+      <div class="progress-bar" style="width: ${score}%; background-color: ${getColorFromPercentage(score)};">
+        ${shape}: ${score.toFixed(1)}%
+      </div>
+    </div>
+  `).join('')}
+`;
+
+      document.getElementById("result").innerHTML = progressBarsHtml;
+      document.getElementById("suggestedItems").innerHTML = resultHtml + suggestedItemsHtml;
+      document.getElementById("suggestedItems").style.display = "block";
+    });
+
+    // Trigger calculate on Enter key press
+    document.getElementById("bodyShapeForm").addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        document.getElementById("calculateBtn").click();
+      }
     });
   </script>
 </body>
+<script>
+    function toggleInfo(field) {
+      const el = document.getElementById(`info-${field}`);
+      const isActive = el.classList.contains('active');
+      document.querySelectorAll('.info-text').forEach(info => info.classList.remove('active'));
+      if (!isActive) el.classList.add('active');
+    }
+
+    function calculateRatios(bust, waist, hips) {
+      return {
+        BHR: bust / hips,
+        WBR: waist / bust,
+        WHR: waist / hips
+      };
+    }
+
+    function similarityScore(val, target, tolerance) {
+      return Math.max(0, 100 - (Math.abs(val - target) / tolerance) * 100);
+    }
+
+    function estimateBodyShape(bust, waist, hips) {
+      const { BHR, WBR, WHR } = calculateRatios(bust, waist, hips);
+      return {
+        Hourglass: (similarityScore(BHR, 1.0, 0.1) + similarityScore(WBR, 0.7, 0.1) + similarityScore(WHR, 0.7, 0.1)) / 3,
+        Pear: (similarityScore(BHR, 0.85, 0.1) + similarityScore(WBR, 0.7, 0.1) + similarityScore(WHR, 0.7, 0.1)) / 3,
+        Apple: (similarityScore(BHR, 1.1, 0.1) + similarityScore(WBR, 0.85, 0.1) + similarityScore(WHR, 0.85, 0.1)) / 3,
+        Rectangle: (similarityScore(BHR, 1.0, 0.1) + similarityScore(WBR, 0.85, 0.1) + similarityScore(WHR, 0.85, 0.1)) / 3,
+        "Inverted Triangle": similarityScore(BHR, 1.15, 0.1)
+      };
+    }
+
+    function getColorFromPercentage(percentage) {
+      const red = Math.min(255, (100 - percentage) * 2.55 * 2);
+      const green = Math.min(255, percentage * 2.55 * 2);
+      return `rgb(${red}, ${green}, 0)`;
+    }
+
+const bodyShapeDetails = {
+  Hourglass: {
+    traits: "The <b>hourglass body shape</b> is all about balance - your bust and hips are proportionate with a well-defined waist. This classic figure is made for fitted styles that hug your curves and highlight your silhouette. If you have an hourglass shape, embrace clothing that supports and accentuates your waistline, like wrap dresses, high-waisted jeans, or tailored blazers. Your curvy shape deserves to be celebrated in styles that make you feel confident and empowered.",
+    goal: "Celebrate your curves by choosing clothing that highlights your natural waist while maintaining the balance between top and bottom.",
+    suggestedItems: [
+      { name: "Belted dress", imageUrl: "https://placehold.co/518x558", productURL: "https://www.amazon.co.uk/s?k=womens+Belted+dress" },
+      { name: "Peplum top", imageUrl: "https://placehold.co/474x532", productURL: "https://www.amazon.co.uk/s?k=womens+Peplum+top" },
+      { name: "High-waisted jeans", imageUrl: "https://placehold.co/597x514", productURL: "https://www.amazon.co.uk/s?k=womens+High-waisted+jeans" },
+      { name: "A-line skirt", imageUrl: "https://placehold.co/508x416", productURL: "https://www.amazon.co.uk/s?k=womens+A-line+skirt" },
+      { name: "Tailored blazer", imageUrl: "https://placehold.co/460x442", productURL: "https://www.amazon.co.uk/s?k=womens+Tailored+blazer" },
+      { name: "V-neck top", imageUrl: "https://placehold.co/409x570", productURL: "https://www.amazon.co.uk/s?k=womens+V-neck+top" },
+      { name: "Pencil skirt", imageUrl: "https://placehold.co/429x546", productURL: "https://www.amazon.co.uk/s?k=womens+Pencil+skirt" },
+      { name: "Bodysuit", imageUrl: "https://placehold.co/594x541", productURL: "https://www.amazon.co.uk/s?k=womens+Bodysuit" },
+      { name: "Fit-and-flare dress", imageUrl: "https://placehold.co/591x539", productURL: "https://www.amazon.co.uk/s?k=womens+Fit-and-flare+dress" },
+      { name: "Empire-waist dress", imageUrl: "https://placehold.co/432x548", productURL: "https://www.amazon.co.uk/s?k=womens+Empire-waist+dress" },
+      { name: "Crop top", imageUrl: "https://placehold.co/442x509", productURL: "https://www.amazon.co.uk/s?k=womens+Crop+top" },
+      { name: "Button-down shirt", imageUrl: "https://placehold.co/567x462", productURL: "https://www.amazon.co.uk/s?k=womens+Button-down+shirt" }
+    ]
+  },
+  Pear: {
+      traits: "The <b>pear body shape</b>, also known as the <b>triangle body shape</b>, features hips that are wider than the shoulders. If you have a pear-shaped figure, your curves are beautifully balanced with a defined waist and shapely lower body. Embrace your natural proportions with styles that highlight your waist and add symmetry with structured tops or statement accessories. From wrap dresses to A-line skirts, there are countless flattering fashion options that celebrate your pear-shaped beauty.",
+    goal: "Add visual interest to the upper body to balance the silhouette and gently slim the lower body with clean lines and dark colors.",
+    suggestedItems: [
+      { name: "Off-shoulder top", imageUrl: "https://placehold.co/580x424", productURL: "https://www.amazon.co.uk/s?k=womens+Off-shoulder+top" },
+      { name: "Peplum top", imageUrl: "https://placehold.co/479x470", productURL: "https://www.amazon.co.uk/s?k=womens+Peplum+top" },
+      { name: "Belted cardigan", imageUrl: "https://placehold.co/469x514", productURL: "https://www.amazon.co.uk/s?k=womens+Belted+cardigan" },
+      { name: "Wide-leg pants", imageUrl: "https://placehold.co/423x482", productURL: "https://www.amazon.co.uk/s?k=womens+Wide-leg+pants" },
+      { name: "High-waisted skirt", imageUrl: "https://placehold.co/504x522", productURL: "https://www.amazon.co.uk/s?k=womens+High-waisted+skirt" },
+      { name: "Empire-waist dress", imageUrl: "https://placehold.co/546x462", productURL: "https://www.amazon.co.uk/s?k=womens+Empire-waist+dress" },
+      { name: "V-neck top", imageUrl: "https://placehold.co/567x472", productURL: "https://www.amazon.co.uk/s?k=womens+V-neck+top" },
+      { name: "A-line dress", imageUrl: "https://placehold.co/475x552", productURL: "https://www.amazon.co.uk/s?k=womens+A-line+dress" },
+      { name: "Flowy blouse", imageUrl: "https://placehold.co/464x410", productURL: "https://www.amazon.co.uk/s?k=womens+Flowy+blouse" },
+      { name: "Tailored jacket", imageUrl: "https://placehold.co/481x431", productURL: "https://www.amazon.co.uk/s?k=womens+Tailored+jacket" },
+      { name: "Straight-leg jeans", imageUrl: "https://placehold.co/426x455", productURL: "https://www.amazon.co.uk/s?k=womens+Straight-leg+jeans" },
+      { name: "Printed top", imageUrl: "https://placehold.co/576x556", productURL: "https://www.amazon.co.uk/s?k=womens+Printed+top" }
+    ]
+  },
+  Apple: {
+      traits: "The <b>apple body shape</b>, or <b>round body shape</b>, typically carries more volume through the midsection, often with a full bust and slender legs. If you have an apple-shaped figure, styles that elongate and define the torso, like empire waistlines, flowy tops, and structured jackets can be super flattering and comfortable. Your shape shines in looks that draw the eye upward and let your personality take center stage. Celebrate your curves and wear what makes you feel unstoppable!",
+    goal: "Direct attention to your neckline and legs, while using streamlined garments to create a smooth, flattering torso.",
+    suggestedItems: [
+      { name: "Empire-waist dress", imageUrl: "https://placehold.co/531x493", productURL: "https://www.amazon.co.uk/s?k=womens+Empire-waist+dress" },
+      { name: "V-neck blouse", imageUrl: "https://placehold.co/509x460", productURL: "https://www.amazon.co.uk/s?k=womens+V-neck+blouse" },
+      { name: "Tunic top", imageUrl: "https://placehold.co/468x486", productURL: "https://www.amazon.co.uk/s?k=womens+Tunic+top" },
+      { name: "Straight-leg pants", imageUrl: "https://placehold.co/582x514", productURL: "https://www.amazon.co.uk/s?k=womens+Straight-leg+pants" },
+      { name: "A-line skirt", imageUrl: "https://placehold.co/554x485", productURL: "https://www.amazon.co.uk/s?k=womens+A-line+skirt" },
+      { name: "Tailored jacket", imageUrl: "https://placehold.co/536x441", productURL: "https://www.amazon.co.uk/s?k=womens+Tailored+jacket" },
+      { name: "Belted cardigan", imageUrl: "https://placehold.co/432x507", productURL: "https://www.amazon.co.uk/s?k=womens+Belted+cardigan" },
+      { name: "Bootcut jeans", imageUrl: "https://placehold.co/545x424", productURL: "https://www.amazon.co.uk/s?k=womens+Bootcut+jeans" },
+      { name: "High-waisted trousers", imageUrl: "https://placehold.co/453x454", productURL: "https://www.amazon.co.uk/s?k=womens+High-waisted+trousers" },
+      { name: "Fit-and-flare dress", imageUrl: "https://placehold.co/520x544", productURL: "https://www.amazon.co.uk/s?k=womens+Fit-and-flare+dress" },
+      { name: "Straight-line dress", imageUrl: "https://placehold.co/493x444", productURL: "https://www.amazon.co.uk/s?k=womens+Straight-line+dress" },
+      { name: "Statement necklace", imageUrl: "https://placehold.co/514x439", productURL: "https://www.amazon.co.uk/s?k=womens+Statement+necklace" }
+    ]
+  },
+  Rectangle: {
+    traits: "The <b>rectangle body shape</b> (also called an <b>athletic</b> or <b>straight body shape</b>) typically has evenly balanced shoulders, waist, and hips. If you have a rectangle-shaped body, your naturally streamlined silhouette looks amazing in styles that create definition and movement. Try belted pieces, peplum tops, or layered outfits to highlight your shape. With your versatile frame, you can effortlessly rock minimalist looks or bold prints - whatever makes you feel fabulous!",
+    goal: "Create the illusion of curves with added volume around the hips and bust and draw attention to your waist with definition.",
+    suggestedItems: [
+      { name: "Peplum top", imageUrl: "https://placehold.co/482x521", productURL: "https://www.amazon.co.uk/s?k=womens+Peplum+top" },
+      { name: "Belted dress", imageUrl: "https://placehold.co/542x569", productURL: "https://www.amazon.co.uk/s?k=womens+Belted+dress" },
+      { name: "A-line skirt", imageUrl: "https://placehold.co/547x496", productURL: "https://www.amazon.co.uk/s?k=womens+A-line+skirt" },
+      { name: "Pencil skirt", imageUrl: "https://placehold.co/490x577", productURL: "https://www.amazon.co.uk/s?k=womens+Pencil+skirt" },
+      { name: "Fitted blazer", imageUrl: "https://placehold.co/477x531", productURL: "https://www.amazon.co.uk/s?k=womens+Fitted+blazer" },
+      { name: "V-neck top", imageUrl: "https://placehold.co/502x561", productURL: "https://www.amazon.co.uk/s?k=womens+V-neck+top" },
+      { name: "Bodysuit", imageUrl: "https://placehold.co/419x523", productURL: "https://www.amazon.co.uk/s?k=womens+Bodysuit" },
+      { name: "High-waisted trousers", imageUrl: "https://placehold.co/514x557", productURL: "https://www.amazon.co.uk/s?k=womens+High-waisted+trousers" },
+      { name: "Fit-and-flare dress", imageUrl: "https://placehold.co/503x533", productURL: "https://www.amazon.co.uk/s?k=womens+Fit-and-flare+dress" },
+      { name: "Tailored pants", imageUrl: "https://placehold.co/439x548", productURL: "https://www.amazon.co.uk/s?k=womens+Tailored+pants" },
+      { name: "Ruffled blouse", imageUrl: "https://placehold.co/495x477", productURL: "https://www.amazon.co.uk/s?k=womens+Ruffled+blouse" }
+    ]
+  },
+  InvertedTriangle: {
+      traits: "The <b>inverted triangle body shape</b> features broad shoulders or a larger bust, with narrower hips. If this is your body shape, your powerful upper frame is perfect for off-the-shoulder tops, deep V-necks, and clothes that add volume or curves to your lower half. Balance and style go hand-in-hand, and fashion-forward pieces like wide-leg pants or flared skirts can beautifully showcase your proportions. Celebrate your athletic, statuesque shape with confidence!",
+    goal: "Balance out your silhouette by adding volume to the lower half of your body, while keeping the top streamlined.",
+    suggestedItems: [
+      { name: "Peplum top", imageUrl: "https://placehold.co/514x523", productURL: "https://www.amazon.co.uk/s?k=womens+Peplum+top" },
+      { name: "V-neck dress", imageUrl: "https://placehold.co/522x479", productURL: "https://www.amazon.co.uk/s?k=womens+V-neck+dress" },
+      { name: "A-line skirt", imageUrl: "https://placehold.co/569x511", productURL: "https://www.amazon.co.uk/s?k=womens+A-line+skirt" },
+      { name: "Tailored jacket", imageUrl: "https://placehold.co/508x540", productURL: "https://www.amazon.co.uk/s?k=womens+Tailored+jacket" },
+      { name: "Wide-leg pants", imageUrl: "https://placehold.co/452x485", productURL: "https://www.amazon.co.uk/s?k=womens+Wide-leg+pants" },
+      { name: "Bootcut jeans", imageUrl: "https://placehold.co/523x455", productURL: "https://www.amazon.co.uk/s?k=womens+Bootcut+jeans" },
+      { name: "Fit-and-flare dress", imageUrl: "https://placehold.co/572x544", productURL: "https://www.amazon.co.uk/s?k=womens+Fit-and-flare+dress" },
+      { name: "Belted cardigan", imageUrl: "https://placehold.co/508x511", productURL: "https://www.amazon.co.uk/s?k=womens+Belted+cardigan" },
+      { name: "Maxi skirt", imageUrl: "https://placehold.co/483x562", productURL: "https://www.amazon.co.uk/s?k=womens+Maxi+skirt" },
+      { name: "Asymmetrical dress", imageUrl: "https://placehold.co/504x518", productURL: "https://www.amazon.co.uk/s?k=womens+Asymmetrical+dress" },
+      { name: "A-line trousers", imageUrl: "https://placehold.co/506x477", productURL: "https://www.amazon.co.uk/s?k=womens+A-line+trousers" }
+    ]
+  }
+};
+
+
+    document.getElementById("unitToggle").addEventListener("change", (event) => {
+      updateUnits(event.target.value);
+    });
+
+    document.getElementById("calculateBtn").addEventListener("click", () => {
+      const bust = parseFloat(document.getElementById("bust").value);
+      const waist = parseFloat(document.getElementById("waist").value);
+      const hips = parseFloat(document.getElementById("hips").value);
+      const unit = document.getElementById("unitToggle").value;
+
+      if (isNaN(bust) || isNaN(waist) || isNaN(hips)) {
+        alert("Please enter valid numbers.");
+        return;
+      }
+
+      const bodyShapeScores = estimateBodyShape(bust, waist, hips);
+      const bestShape = Object.keys(bodyShapeScores).reduce((best, current) => {
+        return bodyShapeScores[current] > bodyShapeScores[best] ? current : best;
+      });
+
+      const shapeDetails = bodyShapeDetails[bestShape];
+      const shapeColor = getColorFromPercentage(bodyShapeScores[bestShape]);
+
+      const resultHtml = `
+        <div>
+          <h3>Your Body Shape: ${bestShape}</h3>
+          <p><strong>Traits:</strong> ${shapeDetails.traits}</p>
+          <p><strong>Goal:</strong> ${shapeDetails.goal}</p>
+        </div>
+      `;
+
+      const suggestedItemsHtml = `
+        <h3>Suggested Items:</h3>
+        <div class="image-grid">
+          ${shapeDetails.suggestedItems.map(item => `
+            <div class="image-grid-item" style="cursor: pointer;" onclick="window.open('${item.productURL}', '_blank');">
+              <img src="${item.imageUrl}" alt="${item.name}">
+              <p>${item.name}</p>
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+const sortedScores = Object.entries(bodyShapeScores)
+  .sort((a, b) => b[1] - a[1]); // Sort by score descending
+
+const progressBarsHtml = `
+  <h3>Body Shape Score:</h3>
+  ${sortedScores.map(([shape, score]) => `
+    <div class="progress-container">
+      <div class="progress-bar" style="width: ${score}%; background-color: ${getColorFromPercentage(score)};">
+        ${shape}: ${score.toFixed(1)}%
+      </div>
+    </div>
+  `).join('')}
+`;
+
+      document.getElementById("result").innerHTML = progressBarsHtml;
+      document.getElementById("suggestedItems").innerHTML = resultHtml + suggestedItemsHtml;
+      document.getElementById("suggestedItems").style.display = "block";
+    });
+
+    // Trigger calculate on Enter key press
+    document.getElementById("bodyShapeForm").addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        document.getElementById("calculateBtn").click();
+      }
+    });
+  </script>
 </html>
