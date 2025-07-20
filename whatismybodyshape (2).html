@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Body Shape Estimator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      max-width: 600px;
+      margin: auto;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+    }
+    input[type="number"], select {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.3rem;
+    }
+    button {
+      margin-top: 1.5rem;
+      padding: 0.7rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 2rem;
+    }
+    .tooltip {
+      position: relative;
+      display: inline-block;
+      cursor: help;
+    }
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 250px;
+      background-color: #333;
+      color: #fff;
+      text-align: left;
+      border-radius: 6px;
+      padding: 0.5rem;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 0;
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 0.9rem;
+    }
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+    .progress-container {
+      background-color: #eee;
+      border-radius: 10px;
+      overflow: hidden;
+      height: 20px;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .progress-bar {
+      height: 100%;
+      text-align: right;
+      padding-right: 5px;
+      color: white;
+      white-space: nowrap;
+      line-height: 20px;
+      transition: width 1s ease-in-out;
+      cursor: pointer;
+    }
+    .collapse {
+      display: none;
+      padding-top: 10px;
+    }
+    .suggested-items {
+      margin-top: 2rem;
+      padding: 1rem;
+      background-color: #f4f4f4;
+      border-radius: 10px;
+    }
+    .suggested-items ul {
+      list-style-type: disc;
+      padding-left: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Body Shape Estimator</h1>
+  <form id="bodyShapeForm" onsubmit="return false;">
+    <label>
+      <div class="tooltip">Bust (<span id="bustUnit">in</span>):
+        <span class="tooltiptext">Measure around the fullest part of your bust, usually over the nipples.</span>
+      </div>
+    </label>
+    <input type="number" id="bust" required />
+
+    <label>
+      <div class="tooltip">Waist (<span id="waistUnit">in</span>):
+        <span class="tooltiptext">Measure around the narrowest part of your waist, usually just above your belly button.</span>
+      </div>
+    </label>
+    <input type="number" id="waist" required />
+
+    <label>
+      <div class="tooltip">Hips (<span id="hipsUnit">in</span>):
+        <span class="tooltiptext">Measure around the fullest part of your hips and buttocks.</span>
+      </div>
+    </label>
+    <input type="number" id="hips" required />
+
+    <label>
+      <div class="tooltip">Units:
+        <span class="tooltiptext">Select the measurement units you are using for all inputs.</span>
+      </div>
+      <select id="unitToggle">
+        <option value="in">Inches</option>
+        <option value="cm">Centimeters</option>
+      </select>
+    </label>
+
+    <button type="button" id="calculateBtn">Calculate</button>
+  </form>
+
+  <div class="result" id="result"></div>
+
+  <div class="suggested-items" id="suggestedItems"></div>
+
+  <script>
+    function calculateRatios(bust, waist, hips) {
+      const BHR = bust / hips;
+      const WBR = waist / bust;
+      const WHR = waist / hips;
+      return { BHR, WBR, WHR };
+    }
+
+    function similarityScore(val, target, tolerance) {
+      return Math.max(0, 100 - (Math.abs(val - target) / tolerance) * 100);
+    }
+
+    function estimateBodyShape(bust, waist, hips) {
+      const { BHR, WBR, WHR } = calculateRatios(bust, waist, hips);
+
+      const shapes = {
+        Hourglass: (
+          similarityScore(BHR, 1.0, 0.1) +
+          similarityScore(WBR, 0.7, 0.1) +
+          similarityScore(WHR, 0.7, 0.1)
+        ) / 3,
+
+        Pear: (
+          similarityScore(BHR, 0.85, 0.1) +
+          similarityScore(WBR, 0.7, 0.1) +
+          similarityScore(WHR, 0.7, 0.1)
+        ) / 3,
+
+        Apple: (
+          similarityScore(BHR, 1.1, 0.1) +
+          similarityScore(WBR, 0.85, 0.1) +
+          similarityScore(WHR, 0.85, 0.1)
+        ) / 3,
+
+        Rectangle: (
+          similarityScore(BHR, 1.0, 0.1) +
+          similarityScore(WBR, 0.85, 0.1) +
+          similarityScore(WHR, 0.85, 0.1)
+        ) / 3,
+
+        "Inverted Triangle": similarityScore(BHR, 1.15, 0.1)
+      };
+
+      return shapes;
+    }
+
+    const bodyShapeDetails = {
+      Hourglass: {
+        traits: "Curved figure with a well-defined waist, bust and hips balanced.",
+        goal: "Emphasize your curves and maintain balance in the proportions.",
+        suggestedItems: [
+          "Belted dresses",
+          "High-waisted pants",
+          "V-neck tops",
+          "Peplum tops",
+          "A-line skirts",
+          "Tailored blazers",
+          "Fitted dresses",
+          "Pencil skirts",
+          "Wrap dresses",
+          "Embellished tops"
+        ]
+      },
+      Pear: {
+        traits: "Narrow shoulders and bust with fuller hips and thighs.",
+        goal: "Balance out proportions by adding volume on top and minimizing the bottom.",
+        suggestedItems: [
+          "Embellished tops",
+          "Empire-waist dresses",
+          "Boat-neck tops",
+          "Dark-colored pants",
+          "Tailored blazers",
+          "Peplum tops",
+          "High-waisted skirts",
+          "Off-shoulder tops",
+          "Ruffled blouses",
+          "Fitted jackets"
+        ]
+      },
+      Apple: {
+        traits: "Broader shoulders, bust, and waist, with slimmer legs.",
+        goal: "Draw attention away from the midsection and highlight legs.",
+        suggestedItems: [
+          "Empire-waist dresses",
+          "V-neck tops",
+          "A-line skirts",
+          "Tunic tops",
+          "Wide-legged pants",
+          "Long cardigans",
+          "Flowy blouses",
+          "Bootcut jeans",
+          "Asymmetrical tops",
+          "Draped jackets"
+        ]
+      },
+      Rectangle: {
+        traits: "Similar bust, waist, and hip measurements.",
+        goal: "Create curves by adding volume at the bust and hips.",
+        suggestedItems: [
+          "Peplum tops",
+          "Flared skirts",
+          "Tailored blazers",
+          "Layered looks",
+          "Wide-leg pants",
+          "Ruffle details",
+          "Belted dresses",
+          "Tunic tops",
+          "A-line dresses",
+          "Statement necklaces"
+        ]
+      },
+      "Inverted Triangle": {
+        traits: "Wider shoulders, narrower hips.",
+        goal: "Soften the upper body and add volume to the lower body.",
+        suggestedItems: [
+          "V-neck tops",
+          "Empire-waist dresses",
+          "Flutter-sleeve blouses",
+          "Tailored pants",
+          "Tunic dresses",
+          "Flared jeans",
+          "A-line skirts",
+          "Peplum jackets",
+          "Wide-leg trousers",
+          "Belted tops"
+        ]
+      }
+    };
+
+    function updateUnits(newUnit) {
+      const bustInput = document.getElementById("bust");
+      const waistInput = document.getElementById("waist");
+      const hipsInput = document.getElementById("hips");
+
+      const previousUnit = document.getElementById("bustUnit").textContent;
+
+      if (previousUnit !== newUnit) {
+        const factor = newUnit === "cm" ? 2.54 : 0.393701;
+        bustInput.value = (bustInput.value * factor).toFixed(2);
+        waistInput.value = (waistInput.value * factor).toFixed(2);
+        hipsInput.value = (hipsInput.value * factor).toFixed(2);
+      }
+
+      document.getElementById("bustUnit").textContent = newUnit;
+      document.getElementById("waistUnit").textContent = newUnit;
+      document.getElementById("hipsUnit").textContent = newUnit;
+    }
+
+    document.getElementById("unitToggle").addEventListener("change", function () {
+      updateUnits(this.value);
+    });
+
+    function getColorFromPercentage(percentage) {
+      const red = Math.min(255, (100 - percentage) * 2.55);
+      const green = Math.min(255, percentage * 2.55);
+      return `rgb(${red}, ${green}, 0)`;
+    }
+
+    function toggleDescription(shape) {
+      const description = document.getElementById(`desc-${shape}`);
+      description.style.display = description.style.display === "block" ? "none" : "block";
+    }
+
+    document.getElementById("bodyShapeForm").addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault(); // Prevent form submission
+        document.getElementById("calculateBtn").click();
+      }
+    });
+
+    document.getElementById("calculateBtn").addEventListener("click", function () {
+      const bust = parseFloat(document.getElementById("bust").value);
+      const waist = parseFloat(document.getElementById("waist").value);
+      const hips = parseFloat(document.getElementById("hips").value);
+      const unit = document.getElementById("unitToggle").value;
+
+      if (isNaN(bust) || isNaN(waist) || isNaN(hips)) return;
+
+      const conversionFactor = unit === "cm" ? 0.393701 : 1;
+      const bustInInches = bust * conversionFactor;
+      const waistInInches = waist * conversionFactor;
+      const hipsInInches = hips * conversionFactor;
+
+      const results = estimateBodyShape(bustInInches, waistInInches, hipsInInches);
+      const sortedResults = Object.entries(results).sort((a, b) => b[1] - a[1]);
+
+      const resultDiv = document.getElementById("result");
+      let resultHTML = `<h2>Estimated Body Shape Similarity</h2><ul>`;
+
+      sortedResults.forEach(([shape, score]) => {
+        resultHTML += `
+          <li>
+            <div class="progress-container">
+              <div class="progress-bar" onclick="toggleDescription('${shape}')" style="width: ${score}%; background-color: ${getColorFromPercentage(score)};">
+                ${shape} - ${score.toFixed(1)}%
+              </div>
+            </div>
+            <div id="desc-${shape}" class="collapse">
+              <h3>Details about ${shape} Body Shape:</h3>
+              <p><strong>Traits:</strong> ${bodyShapeDetails[shape].traits}</p>
+              <p><strong>Goal in Styling:</strong> ${bodyShapeDetails[shape].goal}</p>
+              <p><strong>Suggested Items:</strong></p>
+              <ul>
+                ${bodyShapeDetails[shape].suggestedItems.map(item => `<li>${item}</li>`).join('')}
+              </ul>
+            </div>
+          </li>`;
+      });
+
+      resultHTML += `</ul>`;
+      resultDiv.innerHTML = resultHTML;
+
+      const suggestedItemsDiv = document.getElementById("suggestedItems");
+      suggestedItemsDiv.innerHTML = `<h2>Suggested Clothing for Your Body Shape</h2><ul>
+        ${bodyShapeDetails[sortedResults[0][0]].suggestedItems.map(item => `<li>${item}</li>`).join('')}
+      </ul>`;
+    });
+  </script>
+</body>
+</html>
